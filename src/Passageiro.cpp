@@ -22,8 +22,6 @@ void Passageiro::setLocalAtual(Cidade *local)
         return;
     }
 
-    // Se o seu sistema permitir que o passageiro fique sem cidade
-    // durante uma viagem, você remove esse if abaixo:
     if (local == nullptr)
     {
         throw std::invalid_argument("Local invalido.");
