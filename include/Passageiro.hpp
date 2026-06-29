@@ -5,15 +5,17 @@
 
 class Cidade;
 
-class Passageiro {
+class Passageiro
+{
 private:
     std::string nome;
-    Cidade* localAtual;
+    Cidade *localAtual;
+
 public:
-    Passageiro(const std::string &nome, Cidade* localAtual);
+    Passageiro(const std::string &nome, Cidade *localAtual);
     std::string getNome() const;
-    Cidade* getLocalAtual() const;
-    void setLocalAtual(Cidade* local);
+    Cidade *getLocalAtual() const;
+    void setLocalAtual(Cidade *local);
 };
 
 #endif

@@ -1,0 +1,6 @@
+main
+run_testes
+*.exe
+*.o
+html/
+latex/
