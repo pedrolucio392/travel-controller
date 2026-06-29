@@ -1,8 +1,8 @@
-main: src/main.cpp src/Cidade.cpp src/Passageiro.cpp
-	g++ -g -Iinclude src/main.cpp src/Cidade.cpp src/Passageiro.cpp -o main
+main: src/main.cpp src/Cidade.cpp src/Passageiro.cpp src/Trajeto.cpp
+	g++ -g -Iinclude src/main.cpp src/Cidade.cpp src/Passageiro.cpp src/Trajeto.cpp -o main
 
-test: src/testes.cpp src/Cidade.cpp src/Passageiro.cpp
-	g++ -g -Iinclude src/testes.cpp src/Cidade.cpp src/Passageiro.cpp -o run_testes
+test: src/testes.cpp src/Cidade.cpp src/Passageiro.cpp src/Trajeto.cpp
+	g++ -g -Iinclude src/testes.cpp src/Cidade.cpp src/Passageiro.cpp src/Trajeto.cpp -o run_testes
 	./run_testes
 
 doc:
