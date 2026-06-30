@@ -1,9 +1,13 @@
 #include <iostream>
 #include <cassert>
+#include <vector>
 #include "Cidade.hpp"
 #include "Passageiro.hpp"
 #include "Trajeto.hpp"
 #include "Transporte.hpp"
+#include "Viagem.hpp"
+
+//Esqueci o danado dos comentários, vou começar da parte de viagem e o resto faço dps
 
 void test_cidade()
 {
@@ -157,6 +161,98 @@ void test_transporte()
     std::cout << "[OK] Classe Transporte" << std::endl;
 }
 
+void test_viagem()
+{
+    Cidade c1("Natal");
+    Cidade c2("Parelhas");
+
+    // Capacidade de 2 pessoas
+    Transporte onibus("Jardinense", 'T', 2, 80, 200, 2, &c1);
+
+    Passageiro p1("Roberto", &c1);
+    Passageiro p2("Carlos", &c1);
+    Passageiro p3("Lady Laura", &c1);
+
+    std::vector<Passageiro *> passageiros_validos = {&p1, &p2};
+    std::vector<Passageiro *> passageiros_excedentes = {&p1, &p2, &p3};
+
+    // Teste de Sucesso
+    Viagem v_valida(&onibus, passageiros_validos, &c1, &c2);
+    assert(v_valida.isEmAndamento() == false);
+
+    v_valida.iniciarViagem();
+    assert(v_valida.isEmAndamento() == true);
+
+    // Se avançar horas não gerar erro, tá massa
+    v_valida.avancarHoras(5);
+
+    // Teste de Falha: Construtor com ponteiros nulos
+    bool erro_nulo = false;
+    try
+    {
+        Viagem v_nula(nullptr, passageiros_validos, &c1, &c2);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        erro_nulo = true;
+    }
+    assert(erro_nulo == true);
+
+    // Teste de Falha: Transporte no local errado
+    Transporte aviao("Jato", 'A', 50, 800, 1000, 1, &c2);       
+    Viagem v_local_errado(&aviao, passageiros_validos, &c1, &c2);
+    bool erro_local = false;
+    try
+    {
+        v_local_errado.iniciarViagem();
+    }
+    catch (const std::logic_error &e)
+    {
+        erro_local = true;
+    }
+    assert(erro_local == true);
+
+    // Teste de Falha: Superlotação
+    Viagem v_lotada(&onibus, passageiros_excedentes, &c1, &c2);
+    bool erro_lotacao = false;
+    try
+    {
+        v_lotada.iniciarViagem();
+    }
+    catch (const std::logic_error &e)
+    {
+        erro_lotacao = true;
+    }
+    assert(erro_lotacao == true);
+
+    // Avançar tempo antes de iniciar
+    Viagem v_nao_iniciada(&onibus, passageiros_validos, &c1, &c2);
+    bool erro_avanco_estado = false;
+    try
+    {
+        v_nao_iniciada.avancarHoras(2);
+    }
+    catch (const std::logic_error &e)
+    {
+        erro_avanco_estado = true;
+    }
+    assert(erro_avanco_estado == true);
+
+    // Teste de Falha: Avançar zero ou horas negativas
+    bool erro_avanco_tempo = false;
+    try
+    {
+        v_valida.avancarHoras(-3);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        erro_avanco_tempo = true;
+    }
+    assert(erro_avanco_tempo == true);
+
+    std::cout << "[OK] Classe Viagem" << std::endl;
+}
+
 int main()
 {
     std::cout << "Iniciando bateria de testes...\n"
@@ -166,6 +262,7 @@ int main()
     test_passageiro();
     test_trajeto();
     test_transporte();
+    test_viagem();
 
     std::cout << "\nTodos os testes passaram com sucesso!" << std::endl;
     return 0;
