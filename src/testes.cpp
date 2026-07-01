@@ -6,8 +6,9 @@
 #include "Trajeto.hpp"
 #include "Transporte.hpp"
 #include "Viagem.hpp"
+#include "ControladorDeTransito.hpp"
 
-//Esqueci o danado dos comentários, vou começar da parte de viagem e o resto faço dps
+// Esqueci o danado dos comentários, vou começar da parte de viagem e o resto faço dps
 
 void test_cidade()
 {
@@ -199,7 +200,7 @@ void test_viagem()
     assert(erro_nulo == true);
 
     // Teste de Falha: Transporte no local errado
-    Transporte aviao("Jato", 'A', 50, 800, 1000, 1, &c2);       
+    Transporte aviao("Jato", 'A', 50, 800, 1000, 1, &c2);
     Viagem v_local_errado(&aviao, passageiros_validos, &c1, &c2);
     bool erro_local = false;
     try
@@ -253,6 +254,84 @@ void test_viagem()
     std::cout << "[OK] Classe Viagem" << std::endl;
 }
 
+void test_controlador()
+{
+    ControladorDeTransito ctrl;
+
+    // Teste sucesso
+    ctrl.cadastrarCidade("Natal");
+    ctrl.cadastrarCidade("Parelhas");
+    ctrl.cadastrarTrajeto("Natal", "Parelhas", 'T', 300);
+    ctrl.cadastrarTransporte("Jardinense véi de guerra", 'T', 40, 80, 200, 2, "Natal");
+    ctrl.cadastrarPassageiro("Gandalf", "Natal");
+    ctrl.cadastrarPassageiro("Aragorn", "Natal");
+
+    // Teste de Falha: Cadastro com referência inexistente
+    bool erro_trajeto = false;
+    try
+    {
+        // Tenta criar trajeto para Fortaleza, que não foi cadastrada
+        ctrl.cadastrarTrajeto("Natal", "Fortaleza", 'T', 500);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        erro_trajeto = true;
+    }
+    assert(erro_trajeto == true);
+
+    // Teste de Sucesso: Iniciar Viagem Válida
+    std::vector<std::string> passageiros_validos = {"Gandalf", "Aragorn"};
+    bool erro_viagem_valida = false;
+    try
+    {
+        ctrl.iniciarViagem("Jardinense véi de guerra", passageiros_validos, "Natal", "Parelhas");
+    }
+    catch (const std::exception &e)
+    {
+        erro_viagem_valida = true;
+    }
+    assert(erro_viagem_valida == false); // Não deve dar erro
+
+    // Teste de Falha: Iniciar viagem com passageiro inexistente
+    std::vector<std::string> passageiros_invalidos = {"Bolsonaro", "Xandão"};
+    bool erro_passageiro_fantasma = false;
+    try
+    {
+        ctrl.iniciarViagem("Camburão da federal", passageiros_invalidos, "Natal", "Recife");
+    }
+    catch (const std::invalid_argument &e)
+    {
+        erro_passageiro_fantasma = true;
+    }
+    assert(erro_passageiro_fantasma == true);
+
+    // Teste de Sucesso: Avançar Tempo
+    bool erro_avancar_tempo_valido = false;
+    try
+    {
+        ctrl.avancarHoras(3); // Deve passar silenciosamente
+    }
+    catch (const std::exception &e)
+    {
+        erro_avancar_tempo_valido = true;
+    }
+    assert(erro_avancar_tempo_valido == false);
+
+    // Teste de Falha: Tempo Negativo
+    bool erro_tempo_invalido = false;
+    try
+    {
+        ctrl.avancarHoras(-5);
+    }
+    catch (const std::invalid_argument &e)
+    {
+        erro_tempo_invalido = true;
+    }
+    assert(erro_tempo_invalido == true);
+
+    std::cout << "[OK] Classe ControladorDeTransito" << std::endl;
+}
+
 int main()
 {
     std::cout << "Iniciando bateria de testes...\n"
@@ -263,6 +342,7 @@ int main()
     test_trajeto();
     test_transporte();
     test_viagem();
+    test_controlador();
 
     std::cout << "\nTodos os testes passaram com sucesso!" << std::endl;
     return 0;
