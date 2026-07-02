@@ -19,10 +19,6 @@ private:
     std::vector<Passageiro *> passageiros;
     std::vector<Viagem *> viagens;
 
-    Cidade *buscarCidade(const std::string &nome) const;
-    Transporte *buscarTransporte(const std::string &nome) const;
-    Passageiro *buscarPassageiro(const std::string &nome) const;
-
 public:
     void cadastrarCidade(const std::string &nome);
     void cadastrarTrajeto(const std::string &nomeOrigem, const std::string &nomeDestino, char tipo, int distancia);
@@ -31,6 +27,13 @@ public:
     void iniciarViagem(const std::string &nomeTransporte, const std::vector<std::string> &nomesPassageiros, const std::string &nomeOrigem, const std::string &nomeDestino);
     void avancarHoras(int horas);
     void relatarEstado() const;
+
+    Cidade *buscarCidade(const std::string &nome) const;
+    Transporte *buscarTransporte(const std::string &nome) const;
+    Passageiro *buscarPassageiro(const std::string &nome) const;
+
+    // Retorna um vetor com os ponteiros das cidades que formam o caminho mais curto
+    std::vector<Cidade *> calcularMelhorCaminho(const std::string &nomeOrigem, const std::string &nomeDestino) const;
 };
 
 #endif
