@@ -5,6 +5,11 @@
 #include "Transporte.hpp"
 #include "Trajeto.hpp"
 #include <stdexcept>
+// bibliotecas do algoritmo de Dijkstra
+#include <queue>
+#include <map>
+#include <limits>
+#include <algorithm>
 
 void ControladorDeTransito::cadastrarCidade(const std::string &nome)
 {
@@ -106,6 +111,102 @@ void ControladorDeTransito::avancarHoras(int horas)
 void ControladorDeTransito::relatarEstado() const
 {
     return;
+}
+
+// Método que usa o algoritmo
+
+std::vector<Cidade *> ControladorDeTransito::calcularMelhorCaminho(const std::string &nomeOrigem, const std::string &nomeDestino) const
+{
+    Cidade *origem = this->buscarCidade(nomeOrigem);
+    Cidade *destino = this->buscarCidade(nomeDestino);
+
+    if (origem == nullptr || destino == nullptr)
+    {
+        throw std::invalid_argument("Erro: Cidade de origem ou destino não encontrada para calcular rota.");
+    }
+
+    // Cria um mapa onde a chave é uma Cidade, e o valor é uma lista dos Trajetos que saem dela
+    std::map<Cidade *, std::vector<Trajeto *>> adjacencias;
+    for (Trajeto *t : this->trajetos)
+    {
+        // Ida e volta
+        adjacencias[t->getOrigem()].push_back(t);
+        adjacencias[t->getDestino()].push_back(t);
+    }
+
+    // Configuração do Dijkstra
+    std::map<Cidade *, int> distancias;
+    std::map<Cidade *, Cidade *> antecessores;
+
+    // Inicializa todas as distâncias com infinito
+    for (Cidade *c : this->cidades)
+    {
+        distancias[c] = std::numeric_limits<int>::max();
+        antecessores[c] = nullptr;
+    }
+
+    // A distância da origem para ela mesma é zero
+    distancias[origem] = 0;
+
+    // Fila de prioridade que guarda pares de <Distancia, Cidade*>
+    // A estrutura std::greater garante que a cidade com menor distância fique sempre no topo
+    std::priority_queue<std::pair<int, Cidade *>,
+                        std::vector<std::pair<int, Cidade *>>,
+                        std::greater<std::pair<int, Cidade *>>>
+        fila;
+
+    fila.push({0, origem});
+
+    // Encontrar o menor caminho usando o algoritmo
+    while (!fila.empty())
+    {
+        int distAtual = fila.top().first;
+        Cidade *cidadeAtual = fila.top().second;
+        fila.pop();
+
+        // Se chegarno destino, não precisa calcular o resto do mapa
+        if (cidadeAtual == destino)
+            break;
+
+        // Se encontrar um caminho antigo na fila que já foi superado, ignora
+        if (distAtual > distancias[cidadeAtual])
+            continue;
+
+        // Analisa todos os vizinhos da cidade atual
+        for (Trajeto *t : adjacencias[cidadeAtual])
+        {
+            Cidade *vizinho = t->getDestino();
+            int pesoDaAresta = t->getDistancia();
+
+            // Se a distância passando por 'cidadeAtual' for menor que a conhecida
+            if (distancias[cidadeAtual] + pesoDaAresta < distancias[vizinho])
+            {
+                distancias[vizinho] = distancias[cidadeAtual] + pesoDaAresta;
+                antecessores[vizinho] = cidadeAtual; // Gravamos o rastro para voltar depois
+                fila.push({distancias[vizinho], vizinho});
+            }
+        }
+    }
+
+    // Reconstrução do Caminho
+    std::vector<Cidade *> caminhoFinal;
+
+    // Se a distância do destino continua "Infinita", significa que não existe rota possível
+    if (distancias[destino] == std::numeric_limits<int>::max())
+    {
+        return caminhoFinal; // Retorna vetor vazio
+    }
+
+    // Faz o caminho reverso, do destino até a origem, usando o mapa de antecessores
+    for (Cidade *atual = destino; atual != nullptr; atual = antecessores[atual])
+    {
+        caminhoFinal.push_back(atual);
+    }
+
+    // Como rastrea de trás pra frente, precisa inverter o vetor para ficar Origem -> Destino
+    std::reverse(caminhoFinal.begin(), caminhoFinal.end());
+
+    return caminhoFinal;
 }
 
 // Métodos auxiliares para retornar o objeto se eexistir
