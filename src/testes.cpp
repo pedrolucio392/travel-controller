@@ -332,6 +332,58 @@ void test_controlador()
     std::cout << "[OK] Classe ControladorDeTransito" << std::endl;
 }
 
+void test_dijkstra()
+{
+    ControladorDeTransito ctrl;
+
+    // Montando o mapa de teste
+    ctrl.cadastrarCidade("Natal");
+    ctrl.cadastrarCidade("Santa Cruz");
+    ctrl.cadastrarCidade("Currais Novos");
+    ctrl.cadastrarCidade("Parelhas");
+    ctrl.cadastrarCidade("Caico"); // Cidade sem estradas
+
+    // Cadastro de trajetos
+    ctrl.cadastrarTrajeto("Natal", "Santa Cruz", 'T', 100);
+    ctrl.cadastrarTrajeto("Natal", "Currais Novos", 'T', 150);
+    ctrl.cadastrarTrajeto("Santa Cruz", "Parelhas", 'T', 200);
+    ctrl.cadastrarTrajeto("Currais Novos", "Parelhas", 'T', 50);
+
+    // tesde de sucessop
+    // O algoritmo deve escolher ir por Currais Novos e ignorar Santa cruz
+
+    std::vector<Cidade *> rota = ctrl.calcularMelhorCaminho("Natal", "Parelhas");
+
+    // O vetor deve ter exatamente 3 cidades: Natal -> Currais Novos -> Parelhas
+    assert(rota.size() == 3);
+    assert(rota[0]->getNome() == "Natal");
+    assert(rota[1]->getNome() == "Currais Novos");
+    assert(rota[2]->getNome() == "Parelhas");
+
+    // Teste rota Impossível (Destino Isolado)
+    std::vector<Cidade *> rota_isolada = ctrl.calcularMelhorCaminho("Natal", "Caico");
+    assert(rota_isolada.size() == 0); // Como não há estrada, deve retornar vetor vazio
+
+    // Teste viagem para o mesmo lugar
+    std::vector<Cidade *> rota_mesma = ctrl.calcularMelhorCaminho("Natal", "Natal");
+    assert(rota_mesma.size() == 1); // A rota é apenas a própria cidade de origem
+    assert(rota_mesma[0]->getNome() == "Natal");
+
+    // Teste cidades Inexistentes
+    bool erro_cidade_falsa = false;
+    try
+    {
+        ctrl.calcularMelhorCaminho("Natal", "Gotham");
+    }
+    catch (const std::invalid_argument &e)
+    {
+        erro_cidade_falsa = true;
+    }
+    assert(erro_cidade_falsa == true);
+
+    std::cout << "[OK] Algoritmo de Dijkstra (calcularMelhorCaminho)" << std::endl;
+}
+
 int main()
 {
     std::cout << "Iniciando bateria de testes...\n"
@@ -343,6 +395,7 @@ int main()
     test_transporte();
     test_viagem();
     test_controlador();
+    test_dijkstra();
 
     std::cout << "\nTodos os testes passaram com sucesso!" << std::endl;
     return 0;
