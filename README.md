@@ -1,5 +1,7 @@
 # Travel Controller 🚌
 
+[![Documentação Doxygen](https://img.shields.io/badge/Documentação-Online-blue?style=for-the-badge&logo=github)](https://pedrolucio392.github.io/travel-controller/)
+
 Este é um projeto desenvolvido em **C++** para simular rotas, viagens e escalas de transporte de passageiros.
 
 ## 🚀 Principais Funcionalidades
