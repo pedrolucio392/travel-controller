@@ -1,3 +1,8 @@
+/**
+ * @file Passageiro.cpp
+ * @brief Implementação dos métodos da classe Passageiro.
+ */
+
 #include "Passageiro.hpp"
 #include "Cidade.hpp"
 #include <stdexcept>

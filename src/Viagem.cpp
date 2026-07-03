@@ -1,3 +1,12 @@
+/**
+ * @file Viagem.cpp
+ * @brief Implementação dos métodos da classe Viagem.
+ *
+ * Contém a lógica de execução da viagem, incluindo o controle de tempo,
+ * deslocamento físico, paradas obrigatórias para descanso do motorista e
+ * a transição automática entre os trechos da rota (Lista Encadeada).
+ */
+
 #include "Viagem.hpp"
 #include "Cidade.hpp"
 #include "Passageiro.hpp"
@@ -10,10 +19,15 @@ Viagem::Viagem(Transporte *transporte, std::vector<Passageiro *> passageiros, Ci
 {
     if (transporte == nullptr || origem == nullptr || destino == nullptr)
     {
-        throw std::invalid_argument("Transporte, origem ou destino não podem ser nulos.");
+        throw std::invalid_argument("Transporte, origem ou destino nao podem ser nulos.");
     }
 }
 
+/**
+ * @details Verifica a validade da partida (se o veículo está na origem correta e
+ * se há capacidade suficiente). Após a validação, retira o transporte e os passageiros
+ * da cidade atual (setando seus locais para nullptr) para representar o estado "em trânsito".
+ */
 void Viagem::iniciarViagem()
 {
     if (this->emAndamento)
@@ -23,7 +37,7 @@ void Viagem::iniciarViagem()
 
     if (this->transporte->getLocalAtual() != this->origem && this->transporte->getLocalAtual() != nullptr)
     {
-        throw std::logic_error("O transporte não se encontra na cidade de origem nem em trânsito.");
+        throw std::logic_error("O transporte nao se encontra na cidade de origem nem em transito.");
     }
 
     if (this->passageiros.size() > static_cast<size_t>(this->transporte->getCapacidade()))
@@ -44,16 +58,22 @@ void Viagem::iniciarViagem()
     }
 }
 
+/**
+ * @details O avanço do tempo é processado de hora em hora (passo a passo) para
+ * garantir que as validações de descanso (fadiga) e chegada ao destino sejam
+ * verificadas no momento exato. Se o destino do trecho for alcançado e ainda
+ * sobrarem horas a avançar, o próximo trecho da lista encadeada é acionado.
+ */
 void Viagem::avancarHoras(int horas)
 {
     if (!this->emAndamento)
     {
-        throw std::logic_error("Não é possível avançar o tempo de uma viagem que não está em andamento.");
+        throw std::logic_error("Nao eh possivel avancar o tempo de uma viagem que nao esta em andamento.");
     }
 
     if (horas <= 0)
     {
-        throw std::invalid_argument("O número de horas a avançar deve ser maior que zero.");
+        throw std::invalid_argument("O numero de horas a avancar deve ser maior que zero.");
     }
 
     // Roda o tempo de hora em hora e faz as veriricações
@@ -69,7 +89,7 @@ void Viagem::avancarHoras(int horas)
 
         // Se não está descansando, o transporte anda
         int velocidade = this->transporte->getVelocidade();
-        this->distanciaPercorrida += velocidade; // Como anda de hoa em hora e a velocidade é km/h, então é v*1.
+        this->distanciaPercorrida += velocidade; // Como anda de hora em hora e a velocidade é km/h, então é v*1.
         this->distanciaDesdeUltimoDescanso += velocidade;
 
         // Verificação de tempo para descanso
@@ -103,7 +123,7 @@ void Viagem::avancarHoras(int horas)
             }
             else
             {
-                // Gim da viagem, então muda o local dos passageiros e destino
+                // Fim da viagem, então muda o local dos passageiros e destino
                 this->transporte->setLocalAtual(this->destino);
 
                 for (Passageiro *p : this->passageiros)

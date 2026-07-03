@@ -1,3 +1,12 @@
+/**
+ * @file ControladorDeTransito.cpp
+ * @brief Implementação dos métodos da classe ControladorDeTransito.
+ *
+ * Este arquivo contém a lógica principal do sistema, incluindo a manipulação
+ * das listas, persistência de arquivos e a implementação estrutural do
+ * Algoritmo de Dijkstra para cálculo de rotas.
+ */
+
 #include "ControladorDeTransito.hpp"
 #include "Viagem.hpp"
 #include "Cidade.hpp"
@@ -7,13 +16,13 @@
 #include <stdexcept>
 #include <iostream>
 
-// bibliotecas do algoritmo de Dijkstra
+// Bibliotecas do algoritmo de Dijkstra
 #include <queue>
 #include <map>
 #include <limits>
 #include <algorithm>
 
-// bibliotecas para persistência dos dados
+// Bibliotecas para persistência dos dados
 #include <fstream>
 #include <sstream>
 
@@ -30,7 +39,7 @@ void ControladorDeTransito::cadastrarTrajeto(const std::string &nomeOrigem, cons
 
     if (ptrOrigem == nullptr || ptrDestino == nullptr)
     {
-        throw std::invalid_argument("Erro: Cidade de origem ou destino não cadastrada no sistema.");
+        throw std::invalid_argument("Erro: Cidade de origem ou destino nao cadastrada no sistema.");
     }
 
     Trajeto *novoTrajeto = new Trajeto(ptrOrigem, ptrDestino, tipo, distancia);
@@ -43,7 +52,7 @@ void ControladorDeTransito::cadastrarTransporte(const std::string &nome, char ti
 
     if (ptrLocalAtual == nullptr)
     {
-        throw std::invalid_argument("Erro: Cidade atual não cadastrada no sistema.");
+        throw std::invalid_argument("Erro: Cidade atual nao cadastrada no sistema.");
     }
 
     Transporte *novoTransporte = new Transporte(nome, tipo, capacidade, velocidade, distancia_entre_descansos, tempo_de_descanso, ptrLocalAtual);
@@ -56,13 +65,18 @@ void ControladorDeTransito::cadastrarPassageiro(const std::string &nome, const s
 
     if (ptrLocalAtual == nullptr)
     {
-        throw std::invalid_argument("Erro: Cidade atual não cadastrada no sistema.");
+        throw std::invalid_argument("Erro: Cidade atual nao cadastrada no sistema.");
     }
 
     Passageiro *novoPassageiro = new Passageiro(nome, ptrLocalAtual);
     this->passageiros.push_back(novoPassageiro);
 }
 
+/**
+ * @details Este método atua como um "Factory", criando os nós da Lista Encadeada
+ * (objetos Viagem) com base no caminho ótimo gerado pelo Dijkstra, conectando-os
+ * através do método setProxima() antes de dar partida na cabeça da lista.
+ */
 void ControladorDeTransito::iniciarViagem(const std::string &nomeTransporte, const std::vector<std::string> &nomesPassageiros, const std::string &nomeOrigem, const std::string &nomeDestino)
 {
     Transporte *ptrTransporte = buscarTransporte(nomeTransporte);
@@ -71,12 +85,12 @@ void ControladorDeTransito::iniciarViagem(const std::string &nomeTransporte, con
 
     if (ptrTransporte == nullptr)
     {
-        throw std::invalid_argument("Erro: transporte não cadastrado no sistema.");
+        throw std::invalid_argument("Erro: transporte nao cadastrado no sistema.");
     }
 
     if (ptrOrigem == nullptr || ptrDestino == nullptr)
     {
-        throw std::invalid_argument("Erro: Cidade de origem ou destino não cadastrada no sistema.");
+        throw std::invalid_argument("Erro: Cidade de origem ou destino nao cadastrada no sistema.");
     }
 
     std::vector<Passageiro *> ptrsPassageiros;
@@ -87,7 +101,7 @@ void ControladorDeTransito::iniciarViagem(const std::string &nomeTransporte, con
 
         if (ptrPassageiro == nullptr)
         {
-            throw std::invalid_argument("Erro: Passageiro não cadastrado no sistema.");
+            throw std::invalid_argument("Erro: Passageiro nao cadastrado no sistema.");
         }
 
         ptrsPassageiros.push_back(ptrPassageiro);
@@ -96,7 +110,7 @@ void ControladorDeTransito::iniciarViagem(const std::string &nomeTransporte, con
     // Traçar a rota
     std::vector<Cidade *> rotaCalculada = this->calcularMelhorCaminho(nomeOrigem, nomeDestino);
 
-    // Se o vetor voltou vazio não tem estrada
+    // Se o vetor voltou vazio, não tem estrada
     if (rotaCalculada.size() < 2)
     {
         throw std::invalid_argument("Erro: Nenhuma rota viavel encontrada entre a origem e o destino.");
@@ -125,7 +139,7 @@ void ControladorDeTransito::iniciarViagem(const std::string &nomeTransporte, con
         }
         else
         {
-            // Guarda quem é a primeira viagem
+            // Guarda quem é a primeira viagem (Cabeça da lista)
             viagemInicial = novoTrecho;
         }
 
@@ -135,7 +149,7 @@ void ControladorDeTransito::iniciarViagem(const std::string &nomeTransporte, con
     // Dá partida na primeira viagem
     viagemInicial->iniciarViagem();
 
-    // 4. Salva a cabeça da lista no Controlador
+    // Salva a cabeça da lista no Controlador
     this->viagens.push_back(viagemInicial);
 }
 
@@ -225,8 +239,11 @@ void ControladorDeTransito::relatarEstado() const
               << std::endl;
 }
 
-// Método que usa o algoritmo
-
+/**
+ * @details Implementa o Algoritmo de Dijkstra original utilizando uma Fila de
+ * Prioridade (Min-Heap) para complexidade O(E log V). O grafo é mapeado em
+ * tempo real através da vetorização das arestas (Trajetos) bidirecionais.
+ */
 std::vector<Cidade *> ControladorDeTransito::calcularMelhorCaminho(const std::string &nomeOrigem, const std::string &nomeDestino) const
 {
     Cidade *origem = this->buscarCidade(nomeOrigem);
@@ -234,7 +251,7 @@ std::vector<Cidade *> ControladorDeTransito::calcularMelhorCaminho(const std::st
 
     if (origem == nullptr || destino == nullptr)
     {
-        throw std::invalid_argument("Erro: Cidade de origem ou destino não encontrada para calcular rota.");
+        throw std::invalid_argument("Erro: Cidade de origem ou destino nao encontrada para calcular rota.");
     }
 
     // Cria um mapa onde a chave é uma Cidade, e o valor é uma lista dos Trajetos que saem dela
@@ -276,7 +293,7 @@ std::vector<Cidade *> ControladorDeTransito::calcularMelhorCaminho(const std::st
         Cidade *cidadeAtual = fila.top().second;
         fila.pop();
 
-        // Se chegarno destino, não precisa calcular o resto do mapa
+        // Se chegar no destino, não precisa calcular o resto do mapa
         if (cidadeAtual == destino)
             break;
 
@@ -315,13 +332,13 @@ std::vector<Cidade *> ControladorDeTransito::calcularMelhorCaminho(const std::st
         caminhoFinal.push_back(atual);
     }
 
-    // Como rastrea de trás pra frente, precisa inverter o vetor para ficar Origem -> Destino
+    // Como rastreia de trás pra frente, precisa inverter o vetor para ficar Origem -> Destino
     std::reverse(caminhoFinal.begin(), caminhoFinal.end());
 
     return caminhoFinal;
 }
 
-// Métodos auxiliares para retornar o objeto se eexistir
+// Métodos auxiliares para retornar o objeto se existir
 Cidade *ControladorDeTransito::buscarCidade(const std::string &nome) const
 {
     for (Cidade *c : this->cidades)
@@ -358,7 +375,7 @@ Passageiro *ControladorDeTransito::buscarPassageiro(const std::string &nome) con
     return nullptr;
 }
 
-// retorna a distância entre duas cidades
+// Retorna a distância entre duas cidades
 int ControladorDeTransito::getDistanciaEntre(Cidade *origem, Cidade *destino)
 {
     for (Trajeto *t : this->trajetos)
@@ -375,7 +392,7 @@ int ControladorDeTransito::getDistanciaEntre(Cidade *origem, Cidade *destino)
     throw std::invalid_argument("Erro: Nao existe trajeto direto entre as cidades.");
 }
 
-// metodos de persistencia dos dados
+// Métodos de persistencia dos dados
 void ControladorDeTransito::salvarDados() const
 {
     std::ofstream arquivo("banco_de_dados.txt");

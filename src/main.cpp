@@ -1,8 +1,20 @@
+/**
+ * @file main.cpp
+ * @brief Ponto de entrada do Sistema de Gestão de Trânsito.
+ *
+ * Este arquivo contém o loop principal da Interface de Linha de Comando (CLI).
+ * Ele lida com a interação direta do usuário, recebendo os inputs,
+ * tratando o buffer do teclado e repassando os comandos para o ControladorDeTransito.
+ */
+
 #include <iostream>
 #include <string>
 #include <limits>
 #include "ControladorDeTransito.hpp"
 
+/**
+ * @brief Exibe o menu principal de opções no terminal.
+ */
 void exibirMenu()
 {
     std::cout << "\n===================================" << std::endl;
@@ -20,7 +32,14 @@ void exibirMenu()
     std::cout << "Escolha uma opcao: ";
 }
 
-// Funcao auxiliar para ler texto com espaços e limpar o buffer
+/**
+ * @brief Lê uma linha inteira de texto do terminal, lidando corretamente com espaços.
+ *
+ * Utiliza std::ws para limpar buffers residuais (como "Enters" perdidos)
+ * antes de invocar o std::getline, evitando que o programa pule a leitura.
+ *
+ * @return std::string A string completa digitada pelo usuário.
+ */
 std::string lerTexto()
 {
     std::string texto;
@@ -29,11 +48,19 @@ std::string lerTexto()
     return texto;
 }
 
+/**
+ * @brief Função principal do programa.
+ *
+ * Inicializa o Controlador de Trânsito, carrega os dados persistidos
+ * e mantém o loop do menu ativo até que o usuário decida sair.
+ *
+ * @return int Retorna 0 ao finalizar com sucesso.
+ */
 int main()
 {
     ControladorDeTransito ctrl;
 
-    // Carregar dados ai abrir
+    // Carregar dados ao abrir
     ctrl.carregarDados();
 
     int opcao = -1;
@@ -42,7 +69,7 @@ int main()
     {
         exibirMenu();
 
-        // Evitar letras no lugar de nuemros
+        // Evitar letras no lugar de números causando loop infinito
         if (!(std::cin >> opcao))
         {
             std::cin.clear();                                                   // Limpa a flag de erro
@@ -223,7 +250,7 @@ int main()
         }
         case 7:
         {
-            // Mostra o relatório que construido na classe Viagem
+            // Mostra o relatório construido na classe Viagem
             ctrl.relatarEstado();
             break;
         }
