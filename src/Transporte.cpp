@@ -1,3 +1,8 @@
+/**
+ * @file Transporte.cpp
+ * @brief Implementação dos métodos da classe Transporte.
+ */
+
 #include "Transporte.hpp"
 #include "Cidade.hpp"
 #include <stdexcept>
