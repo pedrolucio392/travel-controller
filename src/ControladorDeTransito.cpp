@@ -13,6 +13,10 @@
 #include <limits>
 #include <algorithm>
 
+// bibliotecas para persistência dos dados
+#include <fstream>
+#include <sstream>
+
 void ControladorDeTransito::cadastrarCidade(const std::string &nome)
 {
     Cidade *novaCidade = new Cidade(nome);
@@ -369,4 +373,120 @@ int ControladorDeTransito::getDistanciaEntre(Cidade *origem, Cidade *destino)
 
     // Se chegou aqui, as cidades não estão conectadas
     throw std::invalid_argument("Erro: Nao existe trajeto direto entre as cidades.");
+}
+
+// metodos de persistencia dos dados
+void ControladorDeTransito::salvarDados() const
+{
+    std::ofstream arquivo("banco_de_dados.txt");
+    if (!arquivo.is_open())
+        return;
+
+    // Salvar Cidades
+    arquivo << "[CIDADES]\n";
+    for (Cidade *c : this->cidades)
+    {
+        arquivo << c->getNome() << "\n";
+    }
+
+    // Salvar Trajetos
+    arquivo << "[TRAJETOS]\n";
+    for (Trajeto *t : this->trajetos)
+    {
+        arquivo << t->getOrigem()->getNome() << ";"
+                << t->getDestino()->getNome() << ";"
+                << t->getTipo() << ";"
+                << t->getDistancia() << "\n";
+    }
+
+    // Salvar Transportes (Apenas os que não estão viajando)
+    arquivo << "[TRANSPORTES]\n";
+    for (Transporte *t : this->transportes)
+    {
+        if (t->getLocalAtual() != nullptr)
+        {
+            arquivo << t->getNome() << ";"
+                    << t->getTipo() << ";"
+                    << t->getCapacidade() << ";"
+                    << t->getVelocidade() << ";"
+                    << t->getDistanciaEntreDescansos() << ";"
+                    << t->getTempoDescansoAtual() << ";"
+                    << t->getLocalAtual()->getNome() << "\n";
+        }
+    }
+
+    // Salvar Passageiros (Apenas os que não estão viajando)
+    arquivo << "[PASSAGEIROS]\n";
+    for (Passageiro *p : this->passageiros)
+    {
+        if (p->getLocalAtual() != nullptr)
+        {
+            arquivo << p->getNome() << ";"
+                    << p->getLocalAtual()->getNome() << "\n";
+        }
+    }
+
+    arquivo.close();
+}
+
+void ControladorDeTransito::carregarDados()
+{
+    std::ifstream arquivo("banco_de_dados.txt");
+    if (!arquivo.is_open())
+        return;
+
+    std::string linha;
+    std::string sessaoAtual = "";
+
+    while (std::getline(arquivo, linha))
+    {
+        if (linha.empty())
+            continue;
+
+        if (linha[0] == '[')
+        {
+            sessaoAtual = linha;
+            continue;
+        }
+
+        std::stringstream ss(linha);
+
+        if (sessaoAtual == "[CIDADES]")
+        {
+            this->cadastrarCidade(linha);
+        }
+        else if (sessaoAtual == "[TRAJETOS]")
+        {
+            std::string origem, destino, tipoStr, distStr;
+            std::getline(ss, origem, ';');
+            std::getline(ss, destino, ';');
+            std::getline(ss, tipoStr, ';');
+            std::getline(ss, distStr, ';');
+
+            this->cadastrarTrajeto(origem, destino, tipoStr[0], std::stoi(distStr));
+        }
+        else if (sessaoAtual == "[TRANSPORTES]")
+        {
+            std::string nome, tipoStr, capStr, velStr, distDescStr, tempoDescStr, local;
+            std::getline(ss, nome, ';');
+            std::getline(ss, tipoStr, ';');
+            std::getline(ss, capStr, ';');
+            std::getline(ss, velStr, ';');
+            std::getline(ss, distDescStr, ';');
+            std::getline(ss, tempoDescStr, ';');
+            std::getline(ss, local, ';');
+
+            this->cadastrarTransporte(nome, tipoStr[0], std::stoi(capStr), std::stoi(velStr), std::stoi(distDescStr), std::stoi(tempoDescStr), local);
+        }
+        else if (sessaoAtual == "[PASSAGEIROS]")
+        {
+            std::string nome, local;
+            std::getline(ss, nome, ';');
+            std::getline(ss, local, ';');
+
+            this->cadastrarPassageiro(nome, local);
+        }
+    }
+
+    arquivo.close();
 }
