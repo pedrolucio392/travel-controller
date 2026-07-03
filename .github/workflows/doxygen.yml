@@ -1,0 +1,37 @@
+name: Deploy Doxygen to GitHub Pages
+
+# Executa esse script toda vez que houver um push na branch main
+on:
+  push:
+    branches: ["main"]
+
+# Permissões necessárias para publicar o site
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar o código do repositório
+        uses: actions/checkout@v4
+
+      - name: Instalar Doxygen e Graphviz
+        run: sudo apt-get update && sudo apt-get install -y doxygen graphviz
+
+      - name: Gerar a documentação (HTML)
+        run: doxygen Doxyfile
+
+      - name: Configurar o GitHub Pages
+        uses: actions/configure-pages@v4
+
+      - name: Fazer o upload da pasta html
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './html'
+
+      - name: Publicar no GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
