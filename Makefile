@@ -1,5 +1,5 @@
-main: src/main.cpp src/Cidade.cpp src/Passageiro.cpp src/Trajeto.cpp
-	g++ -g -Iinclude src/main.cpp src/Cidade.cpp src/Passageiro.cpp src/Trajeto.cpp -o main
+main: src/main.cpp src/Cidade.cpp src/Passageiro.cpp src/Trajeto.cpp src/Transporte.cpp src/Viagem.cpp src/ControladorDeTransito.cpp
+	g++ -g -Iinclude src/main.cpp src/Cidade.cpp src/Passageiro.cpp src/Trajeto.cpp src/Transporte.cpp src/Viagem.cpp src/ControladorDeTransito.cpp -o main
 
 test: src/testes.cpp src/Cidade.cpp src/Passageiro.cpp src/Trajeto.cpp src/Transporte.cpp src/Viagem.cpp src/ControladorDeTransito.cpp
 	g++ -g -Iinclude src/testes.cpp src/Cidade.cpp src/Passageiro.cpp src/Trajeto.cpp src/Transporte.cpp src/Viagem.cpp src/ControladorDeTransito.cpp -o run_testes
