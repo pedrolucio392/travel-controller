@@ -7,6 +7,8 @@
 #include "Transporte.hpp"
 #include "Viagem.hpp"
 #include "ControladorDeTransito.hpp"
+#include <string>
+#include <limits>
 
 // Esqueci o danado dos comentários, vou começar da parte de viagem e o resto faço dps
 
@@ -454,6 +456,170 @@ void test_controlador_simulacao()
     }
 }
 
+void test_exibirMenu()
+{
+    std::cout << "\n===================================" << std::endl;
+    std::cout << "    SISTEMA DE GESTAO DE TRANSITO  " << std::endl;
+    std::cout << "===================================" << std::endl;
+    std::cout << "1. Cadastrar Cidade" << std::endl;
+    std::cout << "2. Cadastrar Trajeto (Aresta)" << std::endl;
+    std::cout << "3. Cadastrar Transporte" << std::endl;
+    std::cout << "4. Cadastrar Passageiro" << std::endl;
+    std::cout << "5. Iniciar Nova Viagem" << std::endl;
+    std::cout << "6. Avancar Tempo (Horas)" << std::endl;
+    std::cout << "7. Relatar Estado do Sistema" << std::endl;
+    std::cout << "0. Sair" << std::endl;
+    std::cout << "-----------------------------------" << std::endl;
+    std::cout << "Escolha uma opcao: ";
+}
+
+// Funcao auxiliar para ler texto com espaços e limpar o buffer
+std::string test_lerTexto()
+{
+    std::string texto;
+    std::cin >> std::ws; // Descarta espaços em branco ou enters sobrando no buffer
+    std::getline(std::cin, texto);
+    return texto;
+}
+
+int test_main()
+{
+    ControladorDeTransito ctrl;
+    int opcao = -1;
+
+    // TODO: Adicionar dados iniciais (Seed) aqui para facilitar os testes
+
+    do
+    {
+        test_exibirMenu();
+
+        // Evitar letras no lugar de nuemros
+        if (!(std::cin >> opcao))
+        {
+            std::cin.clear();                                                   // Limpa a flag de erro
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Descarta a entrada ruim
+            opcao = -1;                                                         // Força cair no default do switch
+        }
+
+        switch (opcao)
+        {
+        case 1:
+        {
+            std::cout << "\n--- CADASTRAR CIDADE ---" << std::endl;
+            ctrl.cadastrarCidade("Natal");
+            ctrl.cadastrarCidade("Macaiba");
+            ctrl.cadastrarCidade("Currais Novos");
+            ctrl.cadastrarCidade("Acari");
+            ctrl.cadastrarCidade("Parelhas");
+            break;
+        }
+        case 2:
+        {
+            std::cout << "\n--- CADASTRAR TRAJETO ---" << std::endl;
+            ctrl.cadastrarTrajeto("Natal", "Macaiba", 'A', 20);
+            ctrl.cadastrarTrajeto("Macaiba", "Currais Novos", 'A', 150);
+            ctrl.cadastrarTrajeto("Currais Novos", "Acari", 'A', 40);
+            ctrl.cadastrarTrajeto("Acari", "Parelhas", 'A', 40);
+            ctrl.cadastrarTrajeto("Natal", "Currais Novos", 'T', 250);
+            break;
+        }
+        case 3:
+        {
+            std::cout << "\n--- CADASTRAR TRANSPORTE ---" << std::endl;
+            ctrl.cadastrarTransporte("Viacao Serido", 'T', 45, 80, 100, 1, "Natal");
+            ctrl.cadastrarTransporte("Van Expressa", 'T', 15, 100, 200, 1, "Natal");
+            break;
+        }
+        case 4:
+        {
+            std::cout << "\n--- CADASTRAR PASSAGEIRO ---" << std::endl;
+            ctrl.cadastrarPassageiro("Pedro", "Natal");
+            ctrl.cadastrarPassageiro("Gandalf", "Natal");
+            ctrl.cadastrarPassageiro("Bilbo", "Currais Novos");
+            break;
+        }
+        case 5:
+        {
+            std::cout << "\n--- INICIAR NOVA VIAGEM ---" << std::endl;
+
+            std::cout << "Nome do Transporte: ";
+            std::string nomeTransporte = test_lerTexto();
+
+            std::cout << "Cidade de Origem: ";
+            std::string origem = test_lerTexto();
+
+            std::cout << "Cidade de Destino: ";
+            std::string destino = test_lerTexto();
+
+            std::vector<std::string> nomesPassageiros;
+            std::cout << "Digite os nomes dos passageiros (pressione 0 para finalizar):" << std::endl;
+
+            while (true)
+            {
+                std::cout << "Passageiro " << (nomesPassageiros.size() + 1) << ": ";
+                std::string nomePassageiro = test_lerTexto();
+
+                if (nomePassageiro == "0")
+                {
+                    break; // Sai do laço se o usuário apertar Enter sem digitar nada
+                }
+                nomesPassageiros.push_back(nomePassageiro);
+            }
+
+            if (nomesPassageiros.empty())
+            {
+                std::cout << "[AVISO] Viagem cancelada: pelo menos um passageiro eh obrigatorio." << std::endl;
+                break;
+            }
+
+            try
+            {
+                std::cout << "\nCalculando rota com Dijkstra e montando escalas..." << std::endl;
+                ctrl.iniciarViagem(nomeTransporte, nomesPassageiros, origem, destino);
+                std::cout << "[OK] Viagem iniciada com sucesso! O veiculo '" << nomeTransporte << "' ja esta a caminho." << std::endl;
+            }
+            catch (const std::exception &e)
+            {
+                std::cout << "\n[ERRO] Nao foi possivel iniciar a viagem: " << e.what() << std::endl;
+            }
+            break;
+        }
+        case 6:
+        {
+            std::cout << "\n--- AVANÇAR TEMPO ---" << std::endl;
+            std::cout << "Quantas horas deseja avancar? ";
+            int horas;
+            std::cin >> horas;
+
+            try
+            {
+                ctrl.avancarHoras(horas);
+                std::cout << "[OK] O tempo avancou " << horas << " horas!\n";
+            }
+            catch (const std::exception &e)
+            {
+                std::cout << "[ERRO] " << e.what() << std::endl;
+            }
+            break;
+        }
+        case 7:
+        {
+            // Mostra o relatório que construímos na classe Viagem
+            ctrl.relatarEstado();
+            break;
+        }
+        case 0:
+            std::cout << "Encerrando o sistema..." << std::endl;
+            break;
+        default:
+            std::cout << "[AVISO] Opcao invalida! Tente novamente." << std::endl;
+        }
+
+    } while (opcao != 0);
+
+    return 0;
+}
+
 int main()
 {
     std::cout << "Iniciando bateria de testes...\n"
@@ -463,10 +629,11 @@ int main()
     test_passageiro();
     test_trajeto();
     test_transporte();
-    //test_viagem();
+    // test_viagem();
     test_controlador();
     test_dijkstra();
     test_controlador_simulacao();
+    test_main();
 
     std::cout << "\nTodos os testes passaram com sucesso!" << std::endl;
     return 0;
