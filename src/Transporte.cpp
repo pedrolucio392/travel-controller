@@ -70,10 +70,20 @@ void Transporte::setLocalAtual(Cidade *local)
         return;
     }
 
-    if (local == nullptr)
-    {
-        throw std::invalid_argument("O local não pode ser nulo.");
-    }
-
     this->localAtual = local;
+}
+
+void Transporte::iniciarDescanso()
+{
+    // O despertador é configurado para a quantidade de horas padrão de descanso deste veículo
+    this->tempo_de_descanso_atual = this->tempo_de_descanso;
+}
+
+void Transporte::decrementarDescanso()
+{
+    // Reduz 1 hora do tempo de descanso para que não fique negativo
+    if (this->tempo_de_descanso_atual > 0)
+    {
+        this->tempo_de_descanso_atual--;
+    }
 }

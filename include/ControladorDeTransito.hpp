@@ -34,6 +34,8 @@ public:
 
     // Retorna um vetor com os ponteiros das cidades que formam o caminho mais curto
     std::vector<Cidade *> calcularMelhorCaminho(const std::string &nomeOrigem, const std::string &nomeDestino) const;
+
+    int getDistanciaEntre(Cidade *origem, Cidade *destino);
 };
 
 #endif
