@@ -3,6 +3,7 @@
 #include "Passageiro.hpp"
 #include "Transporte.hpp"
 #include <stdexcept>
+#include <iostream>
 
 Viagem::Viagem(Transporte *transporte, std::vector<Passageiro *> passageiros, Cidade *origem, Cidade *destino)
     : transporte(transporte), passageiros(passageiros), origem(origem), destino(destino), proxima(nullptr), horasEmTransito(0), emAndamento(false), distanciaDesdeUltimoDescanso(0), distanciaDoTrecho(0), distanciaPercorrida(0)
@@ -120,7 +121,31 @@ void Viagem::avancarHoras(int horas)
 
 void Viagem::relatarEstado() const
 {
-    return;
+    // Usa os getters básicos nas classes de modelo
+    std::cout << "  -> Trecho: [" << this->origem->getNome() << " -> " << this->destino->getNome() << "] ";
+
+    if (this->emAndamento)
+    {
+        std::cout << ">> EM ANDAMENTO <<" << std::endl;
+        std::cout << "     Progresso do Trecho: " << this->distanciaPercorrida << " km / " << this->distanciaDoTrecho << " km" << std::endl;
+
+        if (this->transporte->getTempoDescansoAtual() > 0)
+        {
+            std::cout << "     Status: MOTORISTA DESCANSANDO (" << this->transporte->getTempoDescansoAtual() << "h restantes)" << std::endl;
+        }
+        else
+        {
+            std::cout << "     Status: EM MOVIMENTO (Fadiga Acumulada: " << this->distanciaDesdeUltimoDescanso << " km / " << this->transporte->getDistanciaEntreDescansos() << " km)" << std::endl;
+        }
+    }
+    else if (this->distanciaPercorrida >= this->distanciaDoTrecho && this->distanciaDoTrecho > 0)
+    {
+        std::cout << "[CONCLUIDO]" << std::endl;
+    }
+    else
+    {
+        std::cout << "[AGUARDANDO CONEXAO]" << std::endl;
+    }
 }
 
 bool Viagem::isEmAndamento() const

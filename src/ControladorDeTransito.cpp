@@ -1,10 +1,11 @@
-#include <ControladorDeTransito.hpp>
+#include "ControladorDeTransito.hpp"
 #include "Viagem.hpp"
 #include "Cidade.hpp"
 #include "Passageiro.hpp"
 #include "Transporte.hpp"
 #include "Trajeto.hpp"
 #include <stdexcept>
+#include <iostream>
 
 // bibliotecas do algoritmo de Dijkstra
 #include <queue>
@@ -162,7 +163,62 @@ void ControladorDeTransito::avancarHoras(int horas)
 
 void ControladorDeTransito::relatarEstado() const
 {
-    return;
+    std::cout << "\n==================================================" << std::endl;
+    std::cout << "          PAINEL DE CONTROLE DE TRANSITO          " << std::endl;
+    std::cout << "==================================================" << std::endl;
+
+    // Resumo do Banco de Dados
+    std::cout << "\n[1] RESUMO DO SISTEMA" << std::endl;
+    std::cout << "  Cidades cadastradas: " << this->cidades.size() << std::endl;
+    std::cout << "  Trajetos mapeados: " << this->trajetos.size() << std::endl;
+    std::cout << "  Veiculos na frota: " << this->transportes.size() << std::endl;
+    std::cout << "  Passageiros totais: " << this->passageiros.size() << std::endl;
+
+    // Localização Atual da Frota e Passageiros
+    std::cout << "\n[2] LOCALIZACAO DA FROTA" << std::endl;
+    for (Transporte *t : this->transportes)
+    {
+        std::cout << "  - " << t->getNome() << ": ";
+        if (t->getLocalAtual() == nullptr)
+            std::cout << "Na Rodovia (Em transito)" << std::endl;
+        else
+            std::cout << "Estacionado em " << t->getLocalAtual()->getNome() << std::endl;
+    }
+
+    std::cout << "\n[3] LOCALIZACAO DOS PASSAGEIROS" << std::endl;
+    for (Passageiro *p : this->passageiros)
+    {
+        std::cout << "  - " << p->getNome() << ": ";
+        if (p->getLocalAtual() == nullptr)
+            std::cout << "Viajando (Em transito)" << std::endl;
+        else
+            std::cout << "Aguardando em " << p->getLocalAtual()->getNome() << std::endl;
+    }
+
+    // Horários e Viagens Ativas
+    std::cout << "\n[4] QUADRO DE VIAGENS ATIVAS E ESCALAS" << std::endl;
+    if (this->viagens.empty())
+    {
+        std::cout << "  Nenhuma viagem registrada." << std::endl;
+    }
+    else
+    {
+        for (size_t i = 0; i < this->viagens.size(); i++)
+        {
+            std::cout << "\n  --- ROTA PRINCIPAL #" << (i + 1) << " ---" << std::endl;
+
+            Viagem *trecho = this->viagens[i];
+
+            // Navega por toda a lista encadeada, imprimindo o itinerário inteiro
+            while (trecho != nullptr)
+            {
+                trecho->relatarEstado();
+                trecho = trecho->getProxima();
+            }
+        }
+    }
+    std::cout << "==================================================\n"
+              << std::endl;
 }
 
 // Método que usa o algoritmo
