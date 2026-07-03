@@ -462,7 +462,7 @@ void test_exibirMenu()
     std::cout << "    SISTEMA DE GESTAO DE TRANSITO  " << std::endl;
     std::cout << "===================================" << std::endl;
     std::cout << "1. Cadastrar Cidade" << std::endl;
-    std::cout << "2. Cadastrar Trajeto (Aresta)" << std::endl;
+    std::cout << "2. Cadastrar Trajeto" << std::endl;
     std::cout << "3. Cadastrar Transporte" << std::endl;
     std::cout << "4. Cadastrar Passageiro" << std::endl;
     std::cout << "5. Iniciar Nova Viagem" << std::endl;
@@ -486,8 +486,6 @@ int test_main()
 {
     ControladorDeTransito ctrl;
     int opcao = -1;
-
-    // TODO: Adicionar dados iniciais (Seed) aqui para facilitar os testes
 
     do
     {
@@ -561,7 +559,7 @@ int test_main()
 
                 if (nomePassageiro == "0")
                 {
-                    break; // Sai do laço se o usuário apertar Enter sem digitar nada
+                    break; // Sai do laço se o usuário apertar 0
                 }
                 nomesPassageiros.push_back(nomePassageiro);
             }
@@ -604,7 +602,7 @@ int test_main()
         }
         case 7:
         {
-            // Mostra o relatório que construímos na classe Viagem
+            // Mostra o relatório da classe Viagem
             ctrl.relatarEstado();
             break;
         }
