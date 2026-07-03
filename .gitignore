@@ -4,3 +4,4 @@ run_testes
 *.o
 html/
 latex/
+*.txt

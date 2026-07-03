@@ -36,6 +36,10 @@ public:
     std::vector<Cidade *> calcularMelhorCaminho(const std::string &nomeOrigem, const std::string &nomeDestino) const;
 
     int getDistanciaEntre(Cidade *origem, Cidade *destino);
+
+    // Métodos de Persistência
+    void salvarDados() const;
+    void carregarDados();
 };
 
 #endif

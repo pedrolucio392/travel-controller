@@ -32,6 +32,10 @@ std::string lerTexto()
 int main()
 {
     ControladorDeTransito ctrl;
+
+    // Carregar dados ai abrir
+    ctrl.carregarDados();
+
     int opcao = -1;
 
     do
@@ -225,6 +229,8 @@ int main()
         }
         case 0:
             std::cout << "Encerrando o sistema..." << std::endl;
+            // Salvar dados ao fechar
+            ctrl.salvarDados();
             break;
         default:
             std::cout << "[AVISO] Opcao invalida! Tente novamente." << std::endl;
