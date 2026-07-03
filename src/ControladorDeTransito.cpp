@@ -5,6 +5,7 @@
 #include "Transporte.hpp"
 #include "Trajeto.hpp"
 #include <stdexcept>
+
 // bibliotecas do algoritmo de Dijkstra
 #include <queue>
 #include <map>
@@ -87,23 +88,74 @@ void ControladorDeTransito::iniciarViagem(const std::string &nomeTransporte, con
         ptrsPassageiros.push_back(ptrPassageiro);
     }
 
-    Viagem *novaViagem = new Viagem(ptrTransporte, ptrsPassageiros, ptrOrigem, ptrDestino);
-    novaViagem->iniciarViagem();
-    this->viagens.push_back(novaViagem);
+    // Traçar a rota
+    std::vector<Cidade *> rotaCalculada = this->calcularMelhorCaminho(nomeOrigem, nomeDestino);
+
+    // Se o vetor voltou vazio não tem estrada
+    if (rotaCalculada.size() < 2)
+    {
+        throw std::invalid_argument("Erro: Nenhuma rota viavel encontrada entre a origem e o destino.");
+    }
+
+    // Montar a Lista Encadeada de Viagens
+    Viagem *viagemInicial = nullptr;
+    Viagem *viagemAnterior = nullptr;
+
+    for (size_t i = 0; i < rotaCalculada.size() - 1; i++)
+    {
+        Cidade *cOrigem = rotaCalculada[i];
+        Cidade *cDestino = rotaCalculada[i + 1];
+
+        // Cria o trecho específico
+        Viagem *novoTrecho = new Viagem(ptrTransporte, ptrsPassageiros, cOrigem, cDestino);
+
+        // Busca a quilometragem deste trecho e salva na viagem
+        int distanciaDoTrecho = this->getDistanciaEntre(cOrigem, cDestino);
+        novoTrecho->setDistanciaDoTrecho(distanciaDoTrecho);
+
+        if (viagemAnterior != nullptr)
+        {
+            // Liga o trecho anterior a este novo trecho
+            viagemAnterior->setProxima(novoTrecho);
+        }
+        else
+        {
+            // Guarda quem é a primeira viagem
+            viagemInicial = novoTrecho;
+        }
+
+        viagemAnterior = novoTrecho;
+    }
+
+    // Dá partida na primeira viagem
+    viagemInicial->iniciarViagem();
+
+    // 4. Salva a cabeça da lista no Controlador
+    this->viagens.push_back(viagemInicial);
 }
 
 void ControladorDeTransito::avancarHoras(int horas)
 {
     if (horas <= 0)
     {
-        throw std::invalid_argument("O número de horas a avançar deve ser maior que zero.");
+        throw std::invalid_argument("O numero de horas a avancar deve ser maior que zero.");
     }
 
-    for (Viagem *viagem : this->viagens)
+    // Passa o tempo para todas as rotas ativas no sistema
+    for (Viagem *viagemCabeca : this->viagens)
     {
-        if (viagem->isEmAndamento())
+        Viagem *trechoAtual = viagemCabeca;
+
+        // Pula os trechos que já terminaram até achar o trecho atual da escala
+        while (trechoAtual != nullptr && !trechoAtual->isEmAndamento())
         {
-            viagem->avancarHoras(horas);
+            trechoAtual = trechoAtual->getProxima();
+        }
+
+        // Se achou um trecho em andamento, passa as horas para ele
+        if (trechoAtual != nullptr)
+        {
+            trechoAtual->avancarHoras(horas);
         }
     }
 }
@@ -244,4 +296,21 @@ Passageiro *ControladorDeTransito::buscarPassageiro(const std::string &nome) con
         }
     }
     return nullptr;
+}
+
+// retorna a distância entre duas cidades
+int ControladorDeTransito::getDistanciaEntre(Cidade *origem, Cidade *destino)
+{
+    for (Trajeto *t : this->trajetos)
+    {
+        // Verifica se o trajeto liga as duas cidades (ida ou volta)
+        if ((t->getOrigem() == origem && t->getDestino() == destino) ||
+            (t->getOrigem() == destino && t->getDestino() == origem))
+        {
+            return t->getDistancia();
+        }
+    }
+
+    // Se chegou aqui, as cidades não estão conectadas
+    throw std::invalid_argument("Erro: Nao existe trajeto direto entre as cidades.");
 }

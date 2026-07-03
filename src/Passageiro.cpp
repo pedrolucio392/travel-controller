@@ -22,10 +22,5 @@ void Passageiro::setLocalAtual(Cidade *local)
         return;
     }
 
-    if (local == nullptr)
-    {
-        throw std::invalid_argument("Local invalido.");
-    }
-
     this->localAtual = local;
 }

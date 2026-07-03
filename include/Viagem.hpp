@@ -18,6 +18,9 @@ private:
     Viagem *proxima;
     int horasEmTransito;
     bool emAndamento;
+    int distanciaDoTrecho;   // A distância apenas entre a origem e o destino DESTA viagem específica
+    int distanciaPercorrida; // Quanto já andamos neste trecho
+    int distanciaDesdeUltimoDescanso;
 
 public:
     Viagem(Transporte *transporte, std::vector<Passageiro *> passageiros, Cidade *origem, Cidade *destino);
@@ -25,6 +28,10 @@ public:
     void avancarHoras(int horas);
     void relatarEstado() const;
     bool isEmAndamento() const;
+    Viagem* getProxima() const;
+
+    void setProxima(Viagem *proximaViagem);
+    void setDistanciaDoTrecho(int distancia);
 };
 
 #endif
